@@ -1,4 +1,5 @@
-import { MongoClient } from 'mongodb';
+import mongodb from 'mongodb';
+import Collection from 'mongodb/lib/collection';
 
 
 class DBClient {
@@ -12,7 +13,7 @@ class DBClient {
     const uri = `mongodb://${host}:${port}/${database}`;
 
     // Create MongoDB client instance
-    this.client = new MongoClient(uri, { useUnifiedTopology: true });
+    this.client = new mongodb.MongoClient(uri, { useUnifiedTopology: true });
 
     // Connect to MongoDB
     this.client.connect((err) => {
@@ -26,7 +27,7 @@ class DBClient {
 
   // Check if the MongoDB connection is alive
   isAlive() {
-    return this.client.isconnected();
+    return this.client.isConnected();
   }
 
   // Get the number of documents in the 'users' collection
@@ -45,7 +46,7 @@ class DBClient {
 }
 
 // Create an instance of DBClient
-const dbClient = new DBClient();
+export const dbClient = new DBClient();
 
 // Export the DBClient instance
-export default dbClient;
+export default  dbClient;
