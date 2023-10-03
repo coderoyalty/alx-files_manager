@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
-import fsPromises from 'fs/promises';
+import { promises as fsPromises } from 'fs';
 import dbClient from './db';
 import UserUtils from './user';
 
