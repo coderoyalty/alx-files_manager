@@ -5,4 +5,4 @@ const app = express();
 
 injectRoutes(app);
 
-export default app
+export default app;

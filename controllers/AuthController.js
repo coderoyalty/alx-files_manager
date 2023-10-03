@@ -15,13 +15,18 @@ export default class AuthController {
 
     // Extract and decode email and password from the Authorization header
     const base64Credentials = authorizationHeader.split(' ')[1];
-    const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+    const credentials = Buffer.from(base64Credentials, 'base64').toString(
+      'ascii'
+    );
     const [email, password] = credentials.split(':');
 
     try {
       const usersCollection = await dbClient.usersCollection();
       // Check if user with provided email and hashed password exists in the database
-      const user = await usersCollection.findOne({ email, password: sha1(password) });
+      const user = await usersCollection.findOne({
+        email,
+        password: sha1(password),
+      });
 
       // If user not found, return unauthorized error
       if (!user) {
@@ -41,9 +46,12 @@ export default class AuthController {
     }
   }
 
-  // Handle user logout by deleting the token from Redis
+  /** Handle user logout by deleting the token from Redis
+   * @param {import('express').Request} req - The Express.js Request object.
+   * @param {import('express').Response} res - The Express.js Response object.
+   */
   static async getDisconnect(req, res) {
-    const { token } = req;
+    const token = req.headers['x-token'];
 
     try {
       // Retrieve user ID associated with the token from Redis
@@ -58,7 +66,7 @@ export default class AuthController {
       await redisClient.del(`auth_${token}`);
 
       // Return success response with no content (status code 204)
-      return res.status(204).send();
+      return res.sendStatus(204);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Internal Server Error' });
