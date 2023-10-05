@@ -17,12 +17,12 @@ export default class FileUtils {
     const { data, name, isPublic, type } = fileParams;
     let { parentId } = fileParams;
     if (parentId !== 0) parentId = ObjectId(parentId);
+    const filenameUUID = uuidv4();
+    const path = `${folderPath}/${filenameUUID}`;
 
     // write the data provided if type is not folder
     if (type !== 'folder') {
-      const filenameUUID = uuidv4();
       const fileData = Buffer.from(data, 'base64');
-      const path = `${folderPath}/${filenameUUID}`;
 
       try {
         await fsPromises.mkdir(folderPath, { recursive: true });
