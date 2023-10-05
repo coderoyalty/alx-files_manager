@@ -9,8 +9,8 @@ export default class UserUtils {
    */
   static async getAuthData(request) {
     const token = request.headers['x-token'];
-    const tokenKey = `auth_${token}`;
-    const userId = await redisClient.get(tokenKey);
+
+    const userId = await redisClient.get(`auth_${token}`);
 
     return { token, userId };
   }
@@ -20,15 +20,6 @@ export default class UserUtils {
    * @param {*} id
    * @returns
    */
-
-  static validId(id) {
-    try {
-      const _ = ObjectId(id);
-    } catch (err) {
-      return false;
-    }
-    return true;
-  }
 
   /**
    *

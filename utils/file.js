@@ -70,17 +70,20 @@ export default class FileUtils {
     if (parentId === '0') parentId = 0;
     if (!name) {
       error = 'Missing name';
-    } else if (!type && !allowedTypes.includes('folder')) {
+    } else if (!type || !allowedTypes.includes(type)) {
       error = 'Missing type';
     } else if (!data && type !== 'folder') {
       error = 'Missing data';
     } else if (parentId && parentId !== '0') {
       let file = null;
 
-      if (UserUtils.validId(parentId)) {
+      // contain the possibility of having an invalid parentId
+      try {
         file = await this.getFile({
           _id: ObjectId(parentId),
         });
+      } catch (err) {
+        file = null;
       }
 
       if (!file) {
@@ -108,8 +111,7 @@ export default class FileUtils {
    */
 
   static async getFile(query) {
-    const file = dbClient.filesCollection.findOne(query);
-
+    const file = await (await dbClient.filesCollection()).findOne(query);
     return file;
   }
 }
