@@ -13,11 +13,12 @@ export default class FileUtils {
    * @param {string} folderPath
    * @returns
    */
-  static async saveFile(userId, fileParams, folderPath) {
+  static async writeToFileAndStoreMetadata(userId, fileParams, folderPath) {
     const { data, name, isPublic, type } = fileParams;
     let { parentId } = fileParams;
     if (parentId !== 0) parentId = ObjectId(parentId);
 
+    // write the data provided if type is not folder
     if (type !== 'folder') {
       const filenameUUID = uuidv4();
       const fileData = Buffer.from(data, 'base64');
@@ -29,26 +30,29 @@ export default class FileUtils {
       } catch (err) {
         return { error: err.message, status: 400 };
       }
-
-      const query = {
-        name,
-        type,
-        data,
-        isPublic,
-        parentId,
-        localPath: path,
-        userId: ObjectId(userId),
-      };
-
-      const filesCollection = await dbClient.filesCollection();
-      const result = await filesCollection.insertOne(query);
-
-      const file = { ...query };
-      delete file.localPath;
-      file.id = result.insertedId;
-
-      return { error: null, newFile: file };
     }
+
+    // write the metadata to a database
+    // the metadata can be a folder etc.
+
+    const query = {
+      name,
+      type,
+      data,
+      isPublic,
+      parentId,
+      localPath: path,
+      userId: ObjectId(userId),
+    };
+
+    const filesCollection = await dbClient.filesCollection();
+    const result = await filesCollection.insertOne(query);
+
+    const file = { ...query };
+    delete file.localPath;
+    file.id = result.insertedId;
+
+    return { error: null, newFile: file };
   }
 
   /**

@@ -29,7 +29,11 @@ export default class FilesController {
       return res.status(400).json({ error });
     }
 
-    const data = await FileUtils.saveFile(userId, fileParams, FOLDER_PATH);
+    const data = await FileUtils.writeToFileAndStoreMetadata(
+      userId,
+      fileParams,
+      FOLDER_PATH
+    );
 
     if (data.error) {
       return res.status(data.status).send(data.error);
