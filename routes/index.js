@@ -18,6 +18,8 @@ const injectRoutes = (api) => {
   api.get('/users/me', UsersController.getMe);
 
   api.post('/files', FilesController.postUpload);
+  api.get('/files/:id', FilesController.getShow);
+  api.get('/files', FilesController.getIndex);
 };
 
 export default injectRoutes;
