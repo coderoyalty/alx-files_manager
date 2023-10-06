@@ -11,8 +11,8 @@ export default class FilesController {
    * @param {import('express').Response} res
    */
   static async postUpload(req, res) {
-    const { userId } = UserUtils.getAuthData(req);
-    if (!UserUtils.validId(userId)) {
+    const { userId } = await UserUtils.getAuthData(req);
+    if (!userId) {
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
