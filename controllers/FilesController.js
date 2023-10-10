@@ -60,7 +60,7 @@ export default class FilesController {
     }
 
     const id = req.params.id;
-    if (!id) return res.sendStatus(404);
+    if (!id) return res.status(404).send({ error: 'Not found' });
 
     let query = null;
 
@@ -71,12 +71,12 @@ export default class FilesController {
         userId: ObjectId(userId),
       };
     } catch (err) {
-      return res.sendStatus(404);
+      return res.res.status(404).send({ error: 'Not found' });
     }
 
     const file = await FileUtils.getFile(query);
 
-    if (!file) return res.sendStatus(404);
+    if (!file) return res.res.status(404).send({ error: 'Not found' });
 
     file.id = file.__id;
     delete file.__id;
