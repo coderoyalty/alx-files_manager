@@ -69,7 +69,6 @@ export default class FilesController {
       query = {
         _id: ObjectId(id),
         userId: ObjectId(userId),
-        type: 'file',
       };
     } catch (err) {
       return res.status(404).send({ error: 'Not found' });
