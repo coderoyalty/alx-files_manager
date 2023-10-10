@@ -69,14 +69,15 @@ export default class FilesController {
       query = {
         _id: ObjectId(id),
         userId: ObjectId(userId),
+        type: 'file',
       };
     } catch (err) {
-      return res.res.status(404).send({ error: 'Not found' });
+      return res.status(404).send({ error: 'Not found' });
     }
 
     const file = await FileUtils.getFile(query);
 
-    if (!file) return res.res.status(404).send({ error: 'Not found' });
+    if (!file) return res.status(404).send({ error: 'Not found' });
 
     file.id = file.__id;
     delete file.__id;
