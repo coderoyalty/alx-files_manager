@@ -1,7 +1,7 @@
+import { ObjectId } from 'mongodb';
 import UserUtils from '../utils/user';
 import FileUtils from '../utils/file';
-import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db';
+import db from '../utils/db';
 
 const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
 
@@ -33,7 +33,7 @@ export default class FilesController {
     const data = await FileUtils.writeToFileAndStoreMetadata(
       userId,
       fileParams,
-      FOLDER_PATH
+      FOLDER_PATH,
     );
 
     if (data.error) {
@@ -59,7 +59,7 @@ export default class FilesController {
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) return res.status(404).send({ error: 'Not found' });
 
     let query = null;
@@ -95,12 +95,13 @@ export default class FilesController {
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
-    let parentId = req.query.parentId;
+    let parentId = req.query.parentId || '0';
 
     // test the query field `page` with regex, replace it with 0 if not valid
-    const page = /\d+/.test(req.query.page || '')
-      ? parseInt(req.query.page)
-      : 0;
+    let page = Number(req.query.page) || 0;
+    if (Number.isNaN(page)) {
+      page = 0;
+    }
 
     const perPage = 20;
     const skip = page * perPage;
@@ -108,14 +109,18 @@ export default class FilesController {
     // filter criteria
     const filter = {
       userId: ObjectId(userId),
-      parentId: 0,
     };
 
+    if (parentId === '0') parentId = 0;
     try {
-      if (parentId && ObjectId(parentId)) filter.parentId = ObjectId(parentId);
-    } catch (err) {}
+      if (parentId !== 0 && ObjectId(parentId)) {
+        filter.parentId = ObjectId(parentId);
+      }
+    } catch (err) {
+      res.status(401).send({ error: 'Unauthorized' });
+    }
 
-    const fileCollection = await dbClient.filesCollection();
+    const fileCollection = await db.filesCollection();
     const data = await (
       await fileCollection.aggregate([
         { $match: filter }, // filter based on a criteria
@@ -136,7 +141,7 @@ export default class FilesController {
               $cond: {
                 // use a condition to set `parentId` field
                 if: { $eq: ['$parentId', '0'] }, // if `parentId` == 0
-                then: 0, // then exclude `parentId`
+                then: '0', // then exclude `parentId`
                 else: '$parentId', // rather copy it
               },
             },
