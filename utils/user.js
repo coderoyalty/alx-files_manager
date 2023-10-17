@@ -1,6 +1,5 @@
-import dbClient from './db';
+import db from './db';
 import redisClient from './redis';
-import { ObjectId } from 'mongodb';
 
 export default class UserUtils {
   /**
@@ -28,7 +27,7 @@ export default class UserUtils {
    */
 
   static async getUser(query) {
-    const usersCollection = await dbClient.usersCollection();
+    const usersCollection = await db.usersCollection();
     const user = await usersCollection.findOne(query);
 
     return user;

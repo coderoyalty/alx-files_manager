@@ -1,8 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { promises as fsPromises } from 'fs';
-import dbClient from './db';
-import UserUtils from './user';
+import db from './db';
 
 export default class FileUtils {
   /**
@@ -14,7 +13,9 @@ export default class FileUtils {
    * @returns
    */
   static async writeToFileAndStoreMetadata(userId, fileParams, folderPath) {
-    const { data, name, isPublic, type } = fileParams;
+    const {
+      data, name, isPublic, type,
+    } = fileParams;
     let { parentId } = fileParams;
     if (parentId !== 0) parentId = ObjectId(parentId);
     const filenameUUID = uuidv4();
@@ -45,7 +46,7 @@ export default class FileUtils {
       userId: ObjectId(userId),
     };
 
-    const filesCollection = await dbClient.filesCollection();
+    const filesCollection = await db.filesCollection();
     const result = await filesCollection.insertOne(query);
 
     const file = { ...query };
@@ -62,7 +63,9 @@ export default class FileUtils {
    */
   static async validateBody(req) {
     const allowedTypes = ['image', 'file', 'folder'];
-    const { name, type, data, isPublic = false } = req.body;
+    const {
+      name, type, data, isPublic = false,
+    } = req.body;
 
     let { parentId = 0 } = req.body;
     let error = null;
@@ -111,7 +114,7 @@ export default class FileUtils {
    */
 
   static async getFile(query) {
-    const file = await (await dbClient.filesCollection()).findOne(query);
+    const file = await (await db.filesCollection()).findOne(query);
     return file;
   }
 }

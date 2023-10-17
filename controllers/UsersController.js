@@ -1,6 +1,6 @@
 import sha1 from 'sha1';
-import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
+import db from '../utils/db';
 import redisClient from '../utils/redis';
 
 export default class UsersController {
@@ -17,7 +17,7 @@ export default class UsersController {
       // Check if the email already exists in the database
       const { email, password } = req.body;
 
-      const usersCollection = await dbClient.usersCollection();
+      const usersCollection = await db.usersCollection();
       const existingUser = await usersCollection.findOne({ email });
 
       if (existingUser) {
@@ -57,13 +57,13 @@ export default class UsersController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const usersCollection = await dbClient.usersCollection();
+    const usersCollection = await db.usersCollection();
     const user = await usersCollection.findOne({ _id: ObjectId(userId) });
 
     if (!user) {
       return res.sendStatus(404);
     }
 
-    res.status(200).json({ email: user.email, id: user._id });
+    return res.status(200).json({ email: user.email, id: user._id });
   }
 }

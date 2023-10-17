@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import redisClient from '../utils/redis';
 import sha1 from 'sha1';
-import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
+import db from '../utils/db';
 
 export default class AuthController {
   // Handle user authentication and token generation
@@ -16,12 +16,12 @@ export default class AuthController {
     // Extract and decode email and password from the Authorization header
     const base64Credentials = authorizationHeader.split(' ')[1];
     const credentials = Buffer.from(base64Credentials, 'base64').toString(
-      'ascii'
+      'ascii',
     );
     const [email, password] = credentials.split(':');
 
     try {
-      const usersCollection = await dbClient.usersCollection();
+      const usersCollection = await db.usersCollection();
       // Check if user with provided email and hashed password exists in the database
       const user = await usersCollection.findOne({
         email,
