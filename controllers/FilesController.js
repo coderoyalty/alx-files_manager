@@ -152,4 +152,73 @@ export default class FilesController {
 
     return res.json(data);
   }
+
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  static async putPublish(req, res) {
+    const { userId } = await UserUtils.getAuthData(req);
+    if (!userId) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+    const { id } = req.params;
+
+    let query = null;
+
+    try {
+      // ObjectId throws an error if it's not valid
+      // a try...catch block is the best way to discover
+      // that the query is invalid
+      query = {
+        userId: ObjectId(userId),
+        _id: ObjectId(id),
+      };
+    } catch (err) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const data = await FileUtils.getFile(query);
+
+    if (!data) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    data.isPublic = true;
+    const file = await FileUtils.updateFile(data);
+    return res.send(file);
+  }
+
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  static async putUnpublish(req, res) {
+    const { userId } = await UserUtils.getAuthData(req);
+    if (!userId) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+    const { id } = req.params;
+
+    let query = null;
+
+    try {
+      query = {
+        userId: ObjectId(userId),
+        _id: ObjectId(id),
+      };
+    } catch (err) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const data = await FileUtils.getFile(query);
+
+    if (!data) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    data.isPublic = false;
+    const file = await FileUtils.updateFile(data);
+    return res.send(file);
+  }
 }

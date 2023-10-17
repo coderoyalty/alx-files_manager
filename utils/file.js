@@ -117,4 +117,21 @@ export default class FileUtils {
     const file = await (await db.filesCollection()).findOne(query);
     return file;
   }
+
+  static async updateFile(file) {
+    await (
+      await db.filesCollection()
+    ).updateOne(
+      {
+        _id: file._id,
+      },
+      {
+        $set: file,
+      },
+    );
+    const data = await this.getFile({
+      _id: file._id,
+    });
+    return data;
+  }
 }
