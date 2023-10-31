@@ -1,7 +1,12 @@
 import { ObjectId } from 'mongodb';
+import { realpath } from 'fs';
+import { promisify } from 'util';
+import { contentType } from 'mime-types';
 import UserUtils from '../utils/user';
 import FileUtils from '../utils/file';
 import db from '../utils/db';
+
+const realPathAsync = promisify(realpath);
 
 const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
 
@@ -220,5 +225,35 @@ export default class FilesController {
     data.isPublic = false;
     const file = await FileUtils.updateFile(data);
     return res.send(file);
+  }
+
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  static async getFile(req, res) {
+    let doc = null;
+
+    const { userId } = await UserUtils.getAuthData(req);
+
+    try {
+      doc = await FileUtils.getFile({
+        _id: ObjectId(req.params.id),
+      });
+      if (!doc.isPublic && String(doc.userId) !== userId) {
+        throw new Error('invalid');
+      }
+    } catch (err) {
+      return res.status(404).send({ error: 'Not found' });
+    }
+
+    if (doc.type === 'folder') {
+      return res.status(400).json({ error: "A folder doesn't have content" });
+    }
+    const absPath = await realPathAsync(doc.localPath);
+    const type = contentType(doc.name) || 'text/plain; charset=utf-8';
+    res.setHeader('Content-Type', type);
+    return res.status(200).sendFile(absPath);
   }
 }
